@@ -28,6 +28,31 @@ const store = configureStore({
     }),
 });
 
+// expense tracker work
+import { Transaction } from '../interfaces';
+
+const STORAGE_KEY = 'transactions';
+
+export async function saveTransactions(transactions: Transaction[]): Promise<void> {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+  } catch (e) {
+    console.error('Failed to save transactions:', e);
+  }
+}
+
+export async function loadTransactions(): Promise<Transaction[]> {
+  try {
+    const data = await AsyncStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error('Failed to load transactions:', e);
+    return [];
+  }
+}
+// expense tracker work end
+
+
 export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;

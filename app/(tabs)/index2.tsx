@@ -1,102 +1,78 @@
-import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { FlatList, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid';
+import NoteForm from '../../components/NoteForm';
 
-import { Text, View } from '../../components/Themed';
-import { ITodo } from '../../interfaces';
-import { RootState } from '../../store/store';
-import AddTodo from '../../components/todos/AddTodo';
-import Filters from '../../components/filters';
-import TodoItem from '../../components/todos/TodoItem';
-import ShowFilters from '../../components/filters/ShowFilters';
-
-/**
- * Screen that shows All the Todos
- *
- * @screen
- * @example
- *
- * return <TODOS />
- *
- * @returns {ReactElement}
- * @author Faizan Ahmad <a-f.a@outlook.com>
- * @version 1.0.0
- */
-
-export default function TODOS() {
-  const todos: ITodo[] = useSelector((state: RootState) => state.todos.todos);
-  const [filters, setFilters] = useState({
-    showCompleted: null,
-    filterDueDate: null,
-    filterCategory: null,
-  });
-  const [filtered, setFiltered] = useState(todos);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [isNewTodoModalOpen, setIsNewTodoModalOpen] = useState(false);
+export default function App() {
+  const [notes, setNotes] = useState([]);
+  const [editingNote, setEditingNote] = useState(null);
 
   useEffect(() => {
-    setFiltered(todos);
-  }, [todos]);
+    loadNotes();
+  }, []);
 
-  const renderTodoItem = ({ item }: { item: ITodo }) => (
-    <TodoItem item={item} />
-  );
-
-  const onClearFilters = () => {
-    setFilters({
-      showCompleted: null,
-      filterDueDate: null,
-      filterCategory: null,
-    });
-    setFiltered(todos);
+  const loadNotes = async () => {
+    const data = await AsyncStorage.getItem('notes');
+    if (data) {
+      setNotes(JSON.parse(data));
+    }
   };
+
+  const saveNotes = async (updatedNotes) => {
+    await AsyncStorage.setItem('notes', JSON.stringify(updatedNotes));
+  };
+
+  const addNote = (title, content, category) => {
+    const newNote = {
+      id: uuid.v4(),
+      title,
+      content,
+      category,
+    };
+    const updatedNotes = [newNote, ...notes];
+    setNotes(updatedNotes);
+    saveNotes(updatedNotes);
+  };
+
+  const updateNote = (id, title, content, category) => {
+    const updatedNotes = notes.map(note =>
+      note.id === id ? { id, title, content, category } : note
+    );
+    setNotes(updatedNotes);
+    saveNotes(updatedNotes);
+    setEditingNote(null);
+  };
+
+  const deleteNote = (id) => {
+    const updatedNotes = notes.filter(note => note.id !== id);
+    setNotes(updatedNotes);
+    saveNotes(updatedNotes);
+  };
+
+  const renderNote = ({ item }) => (
+    <TouchableOpacity
+      style={styles.noteItem}
+      onPress={() => setEditingNote(item)}
+    >
+      <Text style={styles.noteTitle}>{item.title}</Text>
+      <Text>{item.category}</Text>
+      <Text numberOfLines={1}>{item.content}</Text>
+      <Button title="Delete" color="red" onPress={() => deleteNote(item.id)} />
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
-      {isNewTodoModalOpen && (
-        <AddTodo setIsModalVisible={setIsNewTodoModalOpen} />
-      )}
-      {isFiltersOpen && (
-        <Filters
-          filters={filters}
-          setFilters={setFilters}
-          setTodos={setFiltered}
-          setIsFiltersOpen={setIsFiltersOpen}
-        />
-      )}
-
-      <View style={styles.header}>
-        <Text
-          style={styles.filters}
-          onPress={() => setIsNewTodoModalOpen(true)}>
-          Add New TODO
-        </Text>
-        <Text
-          style={styles.filters}
-          onPress={() => setIsNewTodoModalOpen(true)}>
-          Edit TODO
-        </Text>
-        <Text style={styles.filters} onPress={() => setIsFiltersOpen(true)}>
-          Filters
-        </Text>
-      </View>
-
-      <ShowFilters filters={filters} onClearFilters={onClearFilters} />
-
-      <Text style={styles.title}>TODO's</Text>
-      <View
-        style={styles.separator}
-        lightColor='#eee'
-        darkColor='rgba(255,255,255,0.1)'
+      <Text style={styles.heading}>📝 Notes App</Text>
+      <NoteForm
+        onSave={editingNote ? updateNote : addNote}
+        editingNote={editingNote}
       />
       <FlatList
-        style={styles.list}
-        data={filtered}
-        renderItem={renderTodoItem}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={() => (
-          <Text style={styles.empty}>No Todo's Found</Text>
-        )}
+        data={notes}
+        keyExtractor={item => item.id}
+        renderItem={renderNote}
       />
     </View>
   );
@@ -105,38 +81,24 @@ export default function TODOS() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    padding: 20,
+    paddingTop: 50,
+    backgroundColor: '#f2f2f2',
   },
-  header: {
-    marginBottom: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '90%',
-  },
-  title: {
-    fontSize: 20,
+  heading: {
+    fontSize: 24,
     fontWeight: 'bold',
+    marginBottom: 10,
   },
-  separator: {
-    marginVertical: 10,
-    height: 1,
-    width: '80%',
+  noteItem: {
+    backgroundColor: '#fff',
+    padding: 15,
+    marginBottom: 10,
+    borderRadius: 8,
+    elevation: 2,
   },
-  filters: {
-    marginVertical: 10,
-    color: '#007AFF',
+  noteTitle: {
     fontWeight: 'bold',
-    textAlign: 'right',
-    marginRight: 5,
-  },
-  list: {
-    flex: 1,
-    marginTop: 10,
-    width: '90%',
-  },
-  empty: {
-    textAlign: 'center',
-    fontSize: 16,
-    marginTop: 20,
+    fontSize: 18,
   },
 });
