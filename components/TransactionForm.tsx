@@ -31,31 +31,61 @@ export default function TransactionForm({ onAdd }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text>Amount:</Text>
+      <Text style={styles.label}>Amount ($)</Text>
       <TextInput
         style={styles.input}
         keyboardType="numeric"
         value={amount}
         onChangeText={setAmount}
+        placeholder="Enter amount"
+        placeholderTextColor="#999"
       />
-      <Text>Type:</Text>
-      <Picker selectedValue={type} onValueChange={(value) => setType(value)} style={styles.input}>
-        <Picker.Item label="Expense" value="expense" />
-        <Picker.Item label="Income" value="income" />
-      </Picker>
-      <Text>Category:</Text>
-      <Picker selectedValue={category} onValueChange={(value) => setCategory(value)} style={styles.input}>
-        <Picker.Item label="Food" value="food" />
-        <Picker.Item label="Travel" value="travel" />
-        <Picker.Item label="Shopping" value="shopping" />
-        <Picker.Item label="Other" value="other" />
-      </Picker>
-      <Button title="Add Transaction" onPress={handleSubmit} />
+
+      <Text style={styles.label}>Type</Text>
+      <View style={styles.pickerWrapper}>
+        <Picker selectedValue={type} onValueChange={(value) => setType(value)} style={styles.picker}>
+          <Picker.Item label="Expense" value="expense" />
+          <Picker.Item label="Income" value="income" />
+        </Picker>
+      </View>
+
+      <Text style={styles.label}>Category</Text>
+      <View style={styles.pickerWrapper}>
+        <Picker selectedValue={category} onValueChange={(value) => setCategory(value)} style={styles.picker}>
+          <Picker.Item label="Food" value="food" />
+          <Picker.Item label="Travel" value="travel" />
+          <Picker.Item label="Shopping" value="shopping" />
+          <Picker.Item label="Other" value="other" />
+        </Picker>
+      </View>
+
+      <Button title="Add Transaction" onPress={handleSubmit} color="#4CAF50" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 20 },
-  input: { marginVertical: 5, padding: 8, borderWidth: 1, borderColor: '#ccc' },
+  container: { marginBottom: 30 },
+  label: { fontWeight: '600', marginBottom: 4, marginTop: 10 },
+  input: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    marginBottom: 10,
+    fontSize: 16,
+    backgroundColor: '#f9f9f9',
+  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#f9f9f9',
+    marginBottom: 10,
+  },
+  picker: {
+    height: 45,
+    paddingHorizontal: 10,
+  },
 });

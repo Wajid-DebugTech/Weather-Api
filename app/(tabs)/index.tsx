@@ -23,7 +23,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
         <TransactionForm onAdd={addTransaction} />
         <Summary transactions={transactions} />
         <TransactionList transactions={transactions} />

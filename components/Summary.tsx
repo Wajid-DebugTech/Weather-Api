@@ -20,11 +20,11 @@ export default function Summary({ transactions }: Props) {
   });
 
   return (
-    <View style={styles.container}>
+    <View style={styles.card}>
       <Text style={styles.total}>Balance: ${total.toFixed(2)}</Text>
       <Text style={styles.header}>Expenses by Category:</Text>
       {Object.entries(byCategory).map(([cat, amount]) => (
-        <Text key={cat}>
+        <Text key={cat} style={styles.categoryItem}>
           {cat}: ${amount.toFixed(2)}
         </Text>
       ))}
@@ -33,7 +33,24 @@ export default function Summary({ transactions }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 20 },
-  total: { fontSize: 20, fontWeight: 'bold' },
-  header: { marginTop: 10, fontWeight: 'bold' },
+  card: {
+    backgroundColor: '#e3f2fd',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+  },
+  total: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#0d47a1',
+  },
+  header: {
+    marginTop: 10,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  categoryItem: {
+    paddingVertical: 2,
+    color: '#333',
+  },
 });
